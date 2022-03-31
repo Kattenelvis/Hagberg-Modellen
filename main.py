@@ -5,23 +5,12 @@ import numpy as np
 # import setUpVariables
 from Household import Household
 from Firm import Firm
+from Bank import Bank
+from State import State
+from Common_functions import total
 
 n=5
 nLengthArray = [0 for j in range(0,n)]
-
-
-
-def total(sector, which_total):
-    sector_size = len(sector)
-    total = np.array([0 for i in range(sector_size)])
-    for i in range(sector_size):
-        print(sector[i].consumption)
-        total = np.add(total, getattr(sector[i], which_total))
-    #sum sector.consupmtion
-    return total
-
-
-
 
 # consumptionFirm = Total(All_firms, "consumption")
     
@@ -42,16 +31,12 @@ def total(sector, which_total):
     #  TaxBank 
     #  TransferalBank 
 
-DebtBank, DebtState, LoansState, bank_loaned, bank_amorted, AmortedState = [nLengthArray for i in range(6)]
 state_saved, bank_saved = (nLengthArray, nLengthArray)
 
 
-def saved_state(firms, households):
-    return np.subtract(np.subtract(np.add(np.add(state_saved, total(firms, "tax")), total(households, "tax")), total(households, "transferal")), total(firms, "transferal"))  
 
 
-def saved_bank():
-    return np.add(np.subtract(bank_saved, bank_loaned), bank_amorted) #+ (CreatedTokens - DestroyedTokens)
+ #+ (CreatedTokens - DestroyedTokens)
 
 
 #Interest rates ?
@@ -91,11 +76,6 @@ p = nLengthArray
 #Pprev set some start state; does not change except for start state
 pprev = [nLengthArray]
 
-
-
-def employable(minAge, maxAge, households):
-    #for every household: if age > minAge and < maxAge, add +1 to some number all divided by N
-    return 0
 
 # Input Output Model, all resources and types of labour in society.
 #First row is for labour hours, second row and below is for tokens and below that comes goods. 
@@ -140,8 +120,6 @@ class Simulation:
     #Number of goods and tokens in the economy, plus one for workhours
     n = 5
 
-    firm_list = [Firm for i in range(n)]
-    household_list = [Household for i in range(n)]
     # IO = np.array([[0 for j in range(0,n)] for i in range(0,n)])
     IO = np.array([
         [0,2,0,1,2],
@@ -151,27 +129,35 @@ class Simulation:
         [1,2,7,9,0]
     ])
     # def __init__(self, ):
-    firms = [Firm for i in range(n)]
-    households = [Household for i in range(n)]
+    firms = [Firm() for i in range(n)]
+    households = [Household(2, 1) for i in range(n)]
+
+    def employable(self, minAge, maxAge):
+        total_employable = 0
+        for i in range(len(self.households)):
+            if self.households[i].is_employable(minAge, maxAge):
+                total_employable+=1
         
+        return total_employable
 
     def time_step(self):
-
+    
         output = np.dot(np.linalg.inv(self.IO), np.add(total(self.firms, "consumption"), total(self.households, "consumption")))
-        
+
+        print(output)    
         #Labour hours
         L = self.IO[0]
 
         #productivity
         m = output/L
 
-        consumed_labour_hours = total(self.firm_list, "consumption")[0]
+        consumed_labour_hours = total(self.firms, "consumption")[0]
 
         # Total worked hours
-        e = (consumed_labour_hours / standard_work_time) / (self.N*employable(16,65, self.household_list))
+        e = (consumed_labour_hours / standard_work_time) / (self.N*self.employable(16,65))
 
         # Wages
-        total_wages = total(self.household_list, "wages")
+        total_wages = total(self.households, "wage")
 
         wage_share = total_wages/output
         
@@ -191,12 +177,9 @@ class Simulation:
 
 
 
-# sim1 = Simulation()
-# sim1.time_step([2,2,2,2,2])
-
 #household.valuesavings is the dot product of the price vector with houshold savings
 
-        #if poor
+        #if very poor
         # if (household.valuesavings < floor) {
         #     if (household.necessary === true){
         #         household.consumption = necessary
@@ -238,15 +221,6 @@ class Simulation:
 #         #case and parents can not be the same. This is checked over the network (connections), over some amount of timesteps.
 #     };
 
-# import random
-# testsimulation = Simulation(4,661,2)
-# testsimulation1 = Simulation(random.Random.random(),66,1)
-
-# testsimulation.time_step()
-
-# Netflix = Firm
-# print(calculate_debt(Netflix, np.array([1,1,1,1,1])))
-# # print(np.multiply(np.array([2,2]), np.array([2,2])))
 
 sim1 = Simulation()
 sim1.simulate(20)

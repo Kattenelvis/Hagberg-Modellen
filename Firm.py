@@ -1,5 +1,6 @@
 import numpy as np
 from Agent import Agent
+from Common_functions import total
 
 class Firm(Agent):             
     savings, debt, consumption, purchase, loan, amorted, tax, transferal, revenue = [np.array([1,4,4,2,3]) for i in range(9)]  
@@ -7,7 +8,7 @@ class Firm(Agent):
     educationsatisfactionperjobtype, jobtypes = (np.array([0,0,0,0]),np.array([0,0,0,0]))
 
     #Every firm produces one good. "typefirm" describes which good that is, based on it's placement in IO 
-    marketshare, typefirm, intelligenceopenness, extraversion = (0,0,0,0)
+    marketshare, firm_type, intelligenceopenness, extraversion = (0,0,0,0)
     psp, pst = (1,1)
    
 
@@ -17,7 +18,7 @@ class Firm(Agent):
         self.planning_period = planning_period
     
 
-    def plan_consumption(self):
+    def plan_consumption(self, pprev):
         
         #pprev is everything that is sold last time period
         #so this is a list of pprev between the beginning of last planning period to now that is summed over
@@ -43,16 +44,23 @@ class Firm(Agent):
         if (t%self.pst == 0):
             self.plan_prices()
 
+    def get_worker(self, households):
+        for i in range(len(households)):
+            if households[i].firm_type == self.firm_type:
+                return households[i]
 
-    def saved(self, households):
+
+    def saved(self, households, V):
         #modifier for households: (w - pay + purchase)
         #modifier for firms: (- w + revenue - turnover)
         total_household_purchase = total(households, "purchase")
-        turnover = np.subtract(self.revenue, total_household_purchase[self.typefirm])
+        turnover = np.subtract(self.revenue, total_household_purchase[self.firm_type])
         
-        revenue = nLengthArray
+        revenue = self.nLengthArray
         revenue[1] = np.dot(turnover, V)
 
-        modifier = np.subtract(np.subtract(revenue, wage(self)), turnover)
+
+
+        modifier = np.subtract(np.subtract(revenue, self.get_worker(households)), turnover)
         
-        return np.add(np.subtract(np.add(np.add(np.subtract(self.saved, self.tax), self.transferal), self.loan), self.amorted), ) 
+        return np.add(np.subtract(np.add(np.add(np.subtract(self.saved, self.tax), self.transferal), self.loan), self.amorted), modifier) 

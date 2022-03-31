@@ -1,3 +1,4 @@
+from pickle import TRUE
 import numpy as np
 from asyncio.windows_events import NULL
 from Agent import Agent
@@ -6,7 +7,7 @@ class Household(Agent):
 
     def __init__(self, numChildren, n):
         self.children = np.array([0 for j in range(0, numChildren)])
-        self.savings, self.debts, self.loan, self.amorted, self.tax, self.transferal, self.purchase, self.consumption, self.pay = np.array([self.nLengthArray for i in range(0,8)])
+        self.savings, self.tax, self.transferal, self.purchase, self.consumption, self.pay, self.wage = np.array([self.nLengthArray for i in range(0,7)])
 
     sex, sexuality, language, ethnicity, disability, culturaladherence, attractiveness, firm_type, age = (0,0,0,0,0,0,0,NULL,0)
     intelligenceopenness, conscientiousness, secularrational, selfexpressivity, agreeableness, extraversion, neuroticism = (0,0,0,0,0,0,0)
@@ -23,11 +24,11 @@ class Household(Agent):
     # def deathProbability():
 
     #Utility per household with some preferences
-    def utility(self, preferences):
+    def utility(self, preferences, ps):
         return np.dot(np.multiply(ps, self.consumption), preferences) 
 
 
-    def saved(self, firms, households):
+    def total_saved(self, firms, households, n, V):
         total_household_purchase = self.total(households, "purchase")
         turnover = np.subtract(self.revenue, total_household_purchase[self.typefirm])
         
@@ -44,5 +45,6 @@ class Household(Agent):
         return np.add(np.subtract(np.add(np.add(np.subtract(self.saved, self.tax), self.transferal), self.loan), self.amorted), modifier) 
 
 
-a = Household
-print(a.eps)
+    def is_employable(minAge, maxAge, households):
+    #for every household: if age > minAge and < maxAge, add +1 to some number all divided by N
+        return TRUE
