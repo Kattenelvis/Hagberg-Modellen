@@ -82,9 +82,6 @@ pprev = [nLengthArray]
 
 IO = np.array([[0 for j in range(0,n)] for i in range(0,n)])
 
-# class Agent:
-def calculate_debt(agent, interest):
-    return np.multiply(np.subtract(np.add(agent.debt, agent.loan), agent.amorted), interest)
 
 def saved(agent, modifier):
     #modifier for households: (w - pay + purchase)
@@ -179,41 +176,7 @@ class Simulation:
 
 #household.valuesavings is the dot product of the price vector with houshold savings
 
-        #if very poor
-        # if (household.valuesavings < floor) {
-        #     if (household.necessary === true){
-        #         household.consumption = necessary
-        #     }
-        #     else {
-        #     #V is PriceVector
-        #     #Tensor product
-        #     household.loan = c1¤V¤necessary
-        #     #from bank
-        #     purchase = necessary
-        #     pay = V¤purchase
-        #     #purchases from Firm
-        #     household.consumption = necessary
-        #     #uses it
-        #     }
-        # }
-        # #if basic needs met
-        # elseif (household.valuesavings < roof){
-        #     household.consumption = necessary + c2*(household.savings - necessary)
-        #     purchase = necessary + c3¤normal + c4¤leisure
-        #     pay = V¤(purchase)
-        #     if(debt =/= 0vector){
-        #       amorted = a1*debt
-        #     }
-        # }
-        # #if bourgouise
-        # else {
-        #     household.consumption = household.savings - c5*household.savings
-        #     purchase = necessary + c6*normal + c7*leisure 
-        #     pay = V¤(purchase)
-        #     if(debt =/= 0vector){
-        #       amorted = a2*debt
-        #     }
-        # }
+        
 
 
 # If (age === employable or something like that) {

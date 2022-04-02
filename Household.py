@@ -1,4 +1,3 @@
-from pickle import TRUE
 import numpy as np
 from asyncio.windows_events import NULL
 from Agent import Agent
@@ -47,4 +46,4 @@ class Household(Agent):
 
     def is_employable(minAge, maxAge, households):
     #for every household: if age > minAge and < maxAge, add +1 to some number all divided by N
-        return TRUE
+        return True
