@@ -64,8 +64,6 @@ kald = 0.5;
 CreatedTokens = nLengthArray
 DestroyedTokens = nLengthArray
 
-#Markup is the vector of all marketshares 
-M = nLengthArray
 
 #Beta, the planning error ?
 # beta = nLengthArray
@@ -110,15 +108,13 @@ V = nLengthArray
 class Simulation:
     #Population, always equal to number of households
     N = 0
-    #Time
-    t = 0
     #End Time
     T = 10
     #Number of goods and tokens in the economy, plus one for workhours
     n = 5
 
     # IO = np.array([[0 for j in range(0,n)] for i in range(0,n)])
-    IO = np.array([
+    input_ouput = np.array([
         [0,2,0,1,2],
         [0,0,4,0,1],
         [0,3,0,5,1],
@@ -126,7 +122,7 @@ class Simulation:
         [1,2,7,9,0]
     ])
     # def __init__(self, ):
-    firms = [Firm() for i in range(n)]
+    firms = [Firm(n) for i in range(n)]
     households = [Household(2, 1) for i in range(n)]
 
     def employable(self, minAge, maxAge):
@@ -137,39 +133,58 @@ class Simulation:
         
         return total_employable
 
-    def time_step(self):
+    def time_step(self, t):
     
-        output = np.dot(np.linalg.inv(self.IO), np.add(total(self.firms, "consumption"), total(self.households, "consumption")))
+        output = np.dot(np.linalg.inv(self.input_ouput), np.add(total(self.firms, "consumption"), total(self.households, "consumption")))
 
         print(output)    
         #Labour hours
-        L = self.IO[0]
+        L = self.input_ouput[0]
 
         #productivity
-        m = output/L
+        # m = output/L
 
         consumed_labour_hours = total(self.firms, "consumption")[0]
 
         # Total worked hours
-        e = (consumed_labour_hours / standard_work_time) / (self.N*self.employable(16,65))
+        # e = (consumed_labour_hours / standard_work_time) / (self.N*self.employable(16,65))
 
+        #Periodic choices for Firms
+        for i in range(len(self.firms)):
+            company = self.firms[i]     
+            if (company.will_plan(t, "wst")):
+                company.plan_wages()
+            if (company.will_plan(t, "pst")):
+                company.price_V = company.plan_prices(self.input_ouput)
+            if (company.will_plan(t, "psp")):
+                company.consumption = company.plan_consumption()
+        
+        for i in range(len(self.households)):
+            household = self.households[i]
+            household.consumption_and_purchase(1, 5, np.array([0,0,0,0,2]), V)
         # Wages
-        payWages()
-
-        total_wages = total(self.households, "wage")
+        total_wages = total(self.households, "wage_recieved")
 
         wage_share = total_wages/output
+        
+            
+        
+        
         
         #Taxes will come in if statements
 
         #Kaldorian equation for industrial growth 
         å =  np.multiply(np.dot(output, V), kald)
 
+
+
+
+
         #Death Probability
 
     def simulate(self, T):
-        for i in range(T):
-            self.time_step()
+        for t in range(T):
+            self.time_step(t)
 
 
 

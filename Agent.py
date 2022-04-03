@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Agent:
     def __init__(self, n):
         self.n=n
@@ -7,8 +8,6 @@ class Agent:
         self.amorted, self.debt, self.loan, self.saved = (self.nLengthArray for i in range(4))
 
 
-    def wage_vector(self, eps, M):
-        return np.multiply(np.divide(1, M), eps)
 
 
     def calculate_debt(self, interest):
