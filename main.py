@@ -154,23 +154,24 @@ class Simulation:
         e = (consumed_labour_hours / standard_work_time) / (self.N*self.employable(16,65))
 
         # Wages
+        payWages()
+
         total_wages = total(self.households, "wage")
 
         wage_share = total_wages/output
         
         #Taxes will come in if statements
-   
-        
 
         #Kaldorian equation for industrial growth 
         å =  np.multiply(np.dot(output, V), kald)
 
         #Death Probability
 
-
     def simulate(self, T):
         for i in range(T):
             self.time_step()
+
+
 
 
 

@@ -6,7 +6,7 @@ class Household(Agent):
 
     def __init__(self, numChildren, n):
         self.children = np.array([0 for j in range(0, numChildren)])
-        self.savings, self.tax, self.transferal, self.purchase, self.consumption, self.pay, self.wage = np.array([self.nLengthArray for i in range(0,7)])
+        self.savings, self.tax, self.transferal, self.purchase, self.consumption, self.pay = np.array([self.nLengthArray for i in range(0,6)])
 
     sex, sexuality, language, ethnicity, disability, culturaladherence, attractiveness, firm_type, age = (0,0,0,0,0,0,0,NULL,0)
     intelligenceopenness, conscientiousness, secularrational, selfexpressivity, agreeableness, extraversion, neuroticism = (0,0,0,0,0,0,0)
@@ -47,3 +47,44 @@ class Household(Agent):
     def is_employable(minAge, maxAge, households):
     #for every household: if age > minAge and < maxAge, add +1 to some number all divided by N
         return True
+
+
+    def calculate_tax(self, floor, necessary, c1, c2, c3, c4, c5, c6, a1, a2, V):
+        #if basic needs aren't met
+        if (self.valuesavings < floor):
+            if (self.necessary == True):
+                self.consumption = necessary
+            else:
+                #V is PriceVector
+                #Tensor product
+                loan_vector = self.nLengthArray
+                loan_vector[1] = sum(np.multiply(np.multiply(c1,V),necessary))
+                #from bank
+                purchase = necessary
+
+                pay_vector = self.nLengthArray
+                pay_vector[1] = np.multiply(V,purchase)
+                #purchases from Firms
+                self.consumption = necessary
+                #uses it
+        #if basic needs met
+        elif (self.valuesavings < roof):
+            self.consumption = necessary + c2*(self.savings - necessary)
+            purchase = np.add(necessary, np.add(np.multiply(c3,normal), np.multiply(c4, leisure)))
+
+            pay_vector = self.nLengthArray
+            pay_vector[1] = np.multiply(V,purchase)
+
+            if(debt !== self.nLengthArray):
+            amorted = np.multiply(a1,debt)
+            
+        
+        #if very wealthy
+        else:
+            self.consumption = self.savings - c5*self.savings
+            purchase = necessary + c6*normal + c7*leisure 
+            pay = V¤(purchase)
+            if(debt =/= 0vector){
+            amorted = a2*debt
+            
+        
