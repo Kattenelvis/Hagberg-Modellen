@@ -1,97 +1,101 @@
+from pickle import NONE
 import numpy as np
 from asyncio.windows_events import NULL
 from Agent import Agent
-from Common_variables import nLengthArray
+from Initial import *
+
 
 class Household(Agent):      
 
-    def __init__(self, numChildren, n):
-        self.children = np.array([0 for j in range(0, numChildren)])
-        self.savings, self.tax, self.transferal, self.purchase, self.consumption, self.pay, self.wage_recieved = np.array([nLengthArray for i in range(0,7)])
+    def __init__(self, 
+                 purchase:          np.array = zeroArray,  
+                 consumption:       np.array = zeroArray, 
+                 pay:               np.array = zeroArray, 
+                 wage:              np.array = zeroArray, 
+                 tax:               np.array = zeroArray, 
+                 transferal:        np.array = zeroArray, 
+                 preferences:       np.array = zeroArray, 
+                 purchase_period:   int = 1, 
+                 firm_type:         int = None,
+                 age:               int = 0):
+        self.purchase = purchase
+        self.consumption = consumption 
+        self.pay = pay 
+        self.wage = wage
+        self.tax = tax
+        self.transferal = transferal 
+        self.preferences = preferences
+        self.purchase_period = purchase_period
+        self.firm_type = firm_type
+        self.age = age
 
-    sex, sexuality, language, ethnicity, disability, culturaladherence, attractiveness, firm_type, age = (0,0,0,0,0,0,0,NULL,0)
-    intelligenceopenness, conscientiousness, secularrational, selfexpressivity, agreeableness, extraversion, neuroticism = (0,0,0,0,0,0,0)
+    def utility(self, preferences):
+        return np.dot(self.consumption, preferences) 
+
+    #This is always to be calculated before the new consumption
+    def output(self):
+        return np.dot(inv_input_output, self.consumption)
+    def depreciated_goods(self):
+        return np.subtract(self.output(), self.consumption)
     
-    parents = np.array([0,0])
-    education = np.array([0,0,0,0])
-    connections = np.array([0,0,0,0])
+    def getting_wage(self, firm):
+        self.wage[1] = firm.pay_wages()/firm.number_of_jobs()
+        return self.wage
 
+    def is_employable(self, minAge, maxAge):
+        return (minAge < self.age < maxAge)
 
-    # Each worker is employed at a firm, which has a certain marketshare which determines the wage.
-    #l is worked hours
+    def employment_rate(total_consumption, households, standard_work_time):
+        employable_number = 0
+        employed = (total_consumption[0]*(1/standard_work_time))
+        for i in households:
+            if i.is_employable() == True:
+                employable_number += 1
+        employment_rate = employed/employable_number
+        return employment_rate
 
-
-    # def deathProbability():
-
-    #Utility per household with some preferences
-    def utility(self, preferences, ps):
-        return np.dot(np.multiply(ps, self.consumption), preferences) 
-
-
-    def total_saved(self, firms, households, n, V):
-        total_household_purchase = self.total(households, "purchase")
-        turnover = np.subtract(self.revenue, total_household_purchase[self.typefirm])
+    def change_in_saved(self):
+        return (self.depreciated_goods() + self.wage + self.loan - self.amort + self.transferal 
+                - self.tax + self.purchase - self.pay)
+     
+    #This is hypothesis 1, that does not have any buffert
+    def consumption_and_purchase(self, necessary, price):
+        #Change this if they do not only buy the necessary, differentiate them to include class-differences in spending and consumption
+        a1, a2, a3, a4 = np.array([zeroArray for i in range(4)])
         
-        wage = nLengthArray
-        wage[1] = self.wage_recieved[self.firm_type] * firms[self.firm_type].consumption[0]
-        
-        #modifier for households: (wage - pay_mod + purchase)
-        #modifier for firms: (- wage + revenue - turnover)
-        modifier = np.subtract(np.subtract(self.pay, turnover), wage)
+        normal, leisure = (zeroArray,zeroArray)
 
-        return np.add(np.subtract(np.add(np.add(np.subtract(self.saved, self.tax), self.transferal), self.loan), self.amorted), modifier) 
+        #Lack
+        lack = np.subtract(necessary, self.saved)
+        lack = lack.clip(min=0) 
+        lack_cost = np.dot(lack,price)
 
-
-    def is_employable(minAge, maxAge, households):
-    #for every household: if age > minAge and < maxAge, add +1 to some number all divided by N
-        return True
-
-    def has_necessary(self):
-        return True
-
-
-    def consumption_and_purchase(self, floor, roof, necessary, V):
-        c1,c2,c3,c4,c5,c6,c7,a1,a2 = (nLengthArray for i in range (9))
-        
-        normal, leisure = (nLengthArray,nLengthArray)
-        valuesavings = np.dot(self.savings,V)
-        #if basic needs aren't met
-        if (valuesavings < floor):
-            if (self.has_necessary() == True):
+        #If basic needs aren't met
+        if (lack != zeroArray):
+            #If the household affords the lack
+            if (self.saved[1] >= lack_cost):
+                self.purchase = lack
+                self.pay[1] = lack_cost
                 self.consumption = necessary
             else:
-                #V is PriceVector
-                #Tensor product
-                loan_vector = nLengthArray
-                loan_vector[1] = sum(np.multiply(np.multiply(c1,V),necessary))
-                #from bank
-                purchase = necessary
-
-                pay_vector = nLengthArray
-                pay_vector[1] = np.multiply(V,purchase)
-                #purchases from Firms
+                #If the household does not afford the lack they loan that amount
+                self.loan[1] = lack_cost
+                self.purchase = lack
+                self.pay[1] = lack_cost
                 self.consumption = necessary
-                #uses it
 
+        #If basic needs are met
+        elif (lack == zeroArray):
+            self.consumption = necessary + a1*(self.saved - necessary)
+            self.purchase = np.add(necessary, np.add(np.multiply(a2, normal), np.multiply(a3, leisure)))
+            self.pay[1] = np.dot(price,self.purchase)
 
-        #if basic needs met
-        elif (valuesavings < roof):
-            self.consumption = necessary + c2*(self.savings - necessary)
-            purchase = np.add(necessary, np.add(np.multiply(c3, normal), np.multiply(c4, leisure)))
+            if self.debt != zeroArray:
+                self.amort = np.multiply(a4, self.debt)
 
-            pay_vector = nLengthArray
-            pay_vector[1] = np.multiply(V,purchase)
-
-            if self.debt != nLengthArray:
-                self.amorted = np.multiply(a1, self.debt)
             
-        
-        #if very wealthy
-        else:
-            self.consumption = np.subtract(self.savings, np.multiply(c5,self.savings))
-            purchase = np.add(necessary, np.add(np.multiply(c6,normal), np.multiply(c7,leisure))) 
-            pay = np.multiply(V,purchase)
-            if self.debt != nLengthArray:
-                self.amorted = np.multiply(a2,self.debt)
-            
-        
+        def will_plan(self, t, interval_type):
+            if (t%getattr(self, interval_type) == 0):
+                return True
+            else:
+                return False

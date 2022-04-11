@@ -1,51 +1,118 @@
 import numpy as np
 from Agent import Agent
 from Common_functions import total
-from Common_variables import eps, M
+from Initial import *
 
-class Firm(Agent):             
-    savings, debt, consumption, purchase, loan, amorted, tax, transferal, revenue, wage_paid, price_V, pprev = [np.array([1,4,4,2,3]) for i in range(12)]  
-    connections = np.array([0,0,0,0])
-    educationsatisfactionperjobtype, jobtypes = (np.array([0,0,0,0]),np.array([0,0,0,0]))
-
-    #Every firm produces one good. "typefirm" describes which good that is, based on it's placement in IO 
-    marketshare, firm_type, intelligenceopenness, extraversion = (0,0,0,0)
+class Firm(Agent):   
     
-    #Interval types
-    #time between consumption, prices and wages planning
-    psp, pst, wst = (1,1,1)
-   
-
-    def __init__(self, n, planning_period=1):
-        #Number
-        super(Firm, self).__init__(n)
-        self.prognosis_with_error = self.nLengthArray
-        self.planning_period = planning_period
-        self.wage_paid = self.plan_wages()[self.firm_type] * self.consumption[0]
+    def __init__(self, 
+                 purchase:                  np.array = zeroArray,  
+                 previous_turnover:         np.array = zeroArray,
+                 consumption:               np.array = zeroArray,
+                 wage_markup_relation:      np.array = oneArray, 
+                 prognosis:                 np.array = oneArray,
+                 tax:                       np.array = zeroArray,
+                 transferal:                np.array = zeroArray,
+                 pay:                       np.array = zeroArray,
+                 firm_type:                 int = 2,  
+                 price_setting_period:      int = 1,
+                 wage_setting_period:       int = 1,
+                 production_setting_period: int = 1,
+                 purchase_period:           int = 1,  
+                 marketshare:               float = 1.0):
+        self.purchase = purchase
+        self.previous_turnover = previous_turnover
+        self.consumption = consumption
+        self.wage_markup_relation = wage_markup_relation
+        self.prognosis = prognosis
+        self.tax = tax
+        self.transferal = transferal
+        self.pay = pay
+        self.firm_type = firm_type
+        self.price_setting_period = price_setting_period
+        self.wage_setting_period = wage_setting_period
+        self.production_setting_period = production_setting_period
+        self.purchase_period = purchase_period
+        self.marketshare = marketshare
+  
+    #connections = np.array([0,0,0,0])
+    #educationsatisfactionperjobtype, jobtypes = (np.array([0,0,0,0]),np.array([0,0,0,0]))
+    #intelligenceopenness, extraversion = (0,0)
     
+    #marketshares make up the markup vector
+    def marketshare_setting(self, markup):
+        self.marketshare = markup[self.firm_type]
+        return self.marketshare
+    
+    #This is always to be calculated before the new consumption
+    def output(self):
+        return np.dot(inv_input_output, self.consumption)
+    
+    def produced_and_depreciated_goods(self):
+        return np.subtract(self.output(), self.consumption)
     
     def plan_wages(self):
-        return np.multiply(np.divide(1, M), eps)
+        wage_payed = (1/self.marketshare) * self.wage_markup_relation
+        return wage_payed 
 
-    def plan_consumption(self):
-        #pprev is everything that was sold last time period
-        #so this is a list of pprev between the beginning of last planning period to now that is summed over
-        Average_sold_last_planning_period = sum(self.pprev) / self.planning_period
-        return self.prognosis_with_error[self.firm_type] * Average_sold_last_planning_period
+    def pay_wages(self):
+        total_wage_payed = self.plan_wages() * self.consumption[0]
+        return total_wage_payed
+   
+    #The number of jobs at the firm *it is now set to 1 per firm*
+    def number_of_jobs(self):
+        return 1
 
-
-    #V is price vector
-    def plan_prices(self, input_output):
-        V_new = self.price_V
-        unit_capital_cost = 0
-        for i in range(len(self.price_V)):
-            for j in range(len(self.price_V)):
-                unit_capital_cost += (input_output[j][i] * self.price_V[j]) 
-            
-            V_new[i] = self.marketshare * (unit_capital_cost + self.plan_wages()[i])
+    def turnover_and_revenue(self, total_purchase):
+        turnover, revenue = [zeroArray for i in range(2)]
+        turnover = total_purchase
+        revenue[1] = np.dot(turnover, price)
+        return (turnover, revenue)
+    
+    def change_in_saved(self):
+        wage = zeroArray
+        wage[1] = self.pay_wages()
+        return (self.produced_and_depreciated_goods() - wage + self.loan - self.amort + self.transferal 
+                - self.tax + self.purchase - self.pay - self.turnover_and_revenue()[0] + self.turnover_and_revenue()[1])
+    
+    #Is used at the end of each simulated step
+    def save_previous_turnover(self):
+        self.previous_turnover = self.turnover_and_revenue()[0]
+        return self.previous_turnover
         
-        return V_new
+    
+    #Planning consumption
+    def plan_consumption(self):
+        self.consumption = np.dot(input_output,(self.prognosis * self.previous_turnover))
+        return self.consumption
 
+    def purchases(self):
+        lack = self.consumption - self.saved
+        lack = lack.clip(min=0) 
+        lack_cost = np.dot(lack, price)
+        if (self.saved[1] >= lack_cost):
+            self.purchase = lack
+            self.pay[1] = np.dot(self.purchase, price) 
+        else:
+            self.loan[1] = lack_cost
+            self.purchase = lack
+            self.pay[1] = np.dot(self.purchase, price) 
+
+    #Price setting
+    def plan_prices(self, input_output, price):
+        c1, c2 = (1.0, 0.1)
+        production_vector = zeroArray
+        for i in range(0,n):
+            production_vector += input_output[self.firm_type][i]
+            unit_cost = np.dot(production_vector, price) + self.plan_wages()
+        profit_margin = price[self.firm_type] - unit_cost
+        price[self.firm_type] = c1*unit_cost*self.marketshare + c2*profit_margin*self.marketshare
+        return (unit_cost, profit_margin, price)
+
+    def wage_share(self):
+        wage_share = (self.plan_wages() / (self.plan_wages() + self.plan_prices()[1]))
+        return wage_share
+        
 
     def will_plan(self, t, interval_type):
         if (t%getattr(self, interval_type) == 0):
@@ -54,26 +121,11 @@ class Firm(Agent):
             return False
 
 
-    def get_worker(self, households):
-        for i in range(len(households)):
-            if households[i].firm_type == self.firm_type:
-                return households[i]
+    #Change this constant
+    def industrial_growth_percentage(self):
+        kaldorian_constant = 1
+        kaldorian_growth = (np.dot(self.produced_and_depreciated_goods(), price)/kaldorian_constant)
+        return kaldorian_growth
 
 
-    def saved(self, households, V):
-        #modifier for households: (w - pay + purchase)
-        #modifier for firms: (- w + revenue - turnover)
-        total_household_purchase = total(households, "purchase")
-        turnover = np.subtract(self.revenue, total_household_purchase[self.firm_type])
-        
-        revenue = self.nLengthArray
-        revenue[1] = np.dot(turnover, V)
-
-        modifier = np.subtract(np.subtract(revenue, self.wage_paid), turnover)
-        
-        return np.add(np.subtract(np.add(np.add(np.subtract(self.saved, self.tax), self.transferal), self.loan), self.amorted), modifier) 
-
-
-    def pay_wages(self, households):
-        self.get_worker(households).wage_recieved = self.wage_paid
-        self.savings -= self.wage_paid
+   

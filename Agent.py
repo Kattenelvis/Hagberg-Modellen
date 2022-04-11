@@ -1,17 +1,20 @@
 import numpy as np
+from Initial import *
 
 
 class Agent:
-    def __init__(self, n):
-        self.n=n
-        self.nLengthArray = [0 for j in range(0,n)]
-        self.amorted, self.debt, self.loan, self.saved = (self.nLengthArray for i in range(4))
+    def __init__(self,
+                 amort: np.array = zeroArray,
+                 debt:  np.array = zeroArray,
+                 loan:  np.array = zeroArray,
+                 saved: np.array = zeroArray):
+        self.amort = amort 
+        self.debt = debt 
+        self.loan = loan 
+        self.saved = saved
 
-
-
-
-    def calculate_debt(self, interest):
-        return np.multiply(np.subtract(np.add(self.debt, self.loan), self.amorted), interest)
+    def calculate_debt(self, interest_rate):
+        return (self.debt + self.loan - self.amort)*interest_rate
 
 
     
