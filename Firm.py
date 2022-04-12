@@ -6,18 +6,18 @@ from Initial import *
 class Firm(Agent):   
     
     def __init__(self, 
-                 purchase:                  np.array = zeroArray,  
-                 previous_turnover:         np.array = zeroArray,
-                 consumption:               np.array = zeroArray,
+                 purchase:                  np.array = np.zeros(n),  
+                 previous_turnover:         np.array = np.zeros(n),
+                 consumption:               np.array = np.zeros(n),
                  wage_markup_relation:      int = 1, 
-                 prognosis:                 np.array = oneArray,
-                 tax:                       np.array = zeroArray,
-                 transferal:                np.array = zeroArray,
-                 pay:                       np.array = zeroArray,
-                 amort:                     np.array = zeroArray,
-                 debt:                      np.array = zeroArray,
-                 loan:                      np.array = zeroArray,
-                 saved:                     np.array = zeroArray,
+                 prognosis:                 np.array = np.ones(n),
+                 tax:                       np.array = np.zeros(n),
+                 transferal:                np.array = np.zeros(n),
+                 pay:                       np.array = np.zeros(n),
+                 amort:                     np.array = np.zeros(n),
+                 debt:                      np.array = np.zeros(n),
+                 loan:                      np.array = np.zeros(n),
+                 saved:                     np.array = np.zeros(n),
                  firm_type:                 int = 2,  
                  price_setting_period:      int = 25,
                  wage_setting_period:       int = 10,
@@ -70,13 +70,13 @@ class Firm(Agent):
         return 1
 
     def turnover_and_revenue(self, total_purchase):
-        turnover, revenue = [zeroArray for i in range(2)]
+        turnover, revenue = [np.zeros(n) for i in range(2)]
         turnover[self.firm_type - 2] = total_purchase
         revenue[1] = np.dot(turnover, price)
         return (turnover, revenue)
     
     def change_in_saved(self, total_purchase):
-        wage = zeroArray
+        wage = np.zeros(n)
         wage[1] = self.pay_wages()
         return (self.produced_and_depreciated_goods() - wage + self.loan - self.amort + self.transferal 
                 - self.tax + self.purchase - self.pay - self.turnover_and_revenue(total_purchase)[0] + self.turnover_and_revenue(total_purchase)[1])

@@ -32,8 +32,4 @@ productivity = [1/input_output[0][j] for j in range (2,n)]
 inv_input_output = np.linalg.inv(input_output)
 
 
-zeroArray = np.array([0 for j in range(n)])
-oneArray = np.array([1 for j in range(n)])
-
-
 

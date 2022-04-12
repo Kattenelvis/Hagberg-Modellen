@@ -4,10 +4,10 @@ from Initial import *
 
 class Agent:
     def __init__(self,
-                 amort: np.array = zeroArray,
-                 debt:  np.array = zeroArray,
-                 loan:  np.array = zeroArray,
-                 saved: np.array = zeroArray):
+                 amort: np.array = np.zeros(n),
+                 debt:  np.array = np.zeros(n),
+                 loan:  np.array = np.zeros(n),
+                 saved: np.array = np.zeros(n)):
         self.amort = amort 
         self.debt = debt 
         self.loan = loan 

@@ -14,7 +14,7 @@ class Household(Agent):
                  wage:              np.array = np.zeros(n), 
                  tax:               np.array = np.zeros(n), 
                  transferal:        np.array = np.zeros(n), 
-                 preferences:       np.array = oneArray, 
+                 preferences:       np.array = np.ones(n), 
                  amort:             np.array = np.zeros(n),
                  debt:              np.array = np.zeros(n),
                  loan:              np.array = np.zeros(n),
@@ -61,9 +61,9 @@ class Household(Agent):
     #This is hypothesis 1, that does not have any buffert
     def consumption_and_purchase(self, necessary, price):
         #Change this if they do not only buy the necessary, differentiate them to include class-differences in spending and consumption
-        a1, a2, a3, a4 = np.array([zeroArray for i in range(4)])
+        a1, a2, a3, a4 = np.array([np.zeros(n) for i in range(4)])
         
-        normal, leisure = (zeroArray,zeroArray)
+        normal, leisure = (np.zeros(n),np.zeros(n))
 
         #Lack of goods to survive
         lack = np.subtract(necessary, self.saved)
@@ -72,7 +72,7 @@ class Household(Agent):
         
 
         #If basic needs aren't met
-        if (any(lack != zeroArray)):
+        if (any(lack != np.zeros(n))):
             #If the household affords the lack
             if (self.saved[1] >= lack_cost):
                 self.purchase = lack
@@ -86,12 +86,12 @@ class Household(Agent):
                 self.consumption = necessary
 
         #If basic needs are met
-        elif (any(lack == zeroArray)):
+        elif (any(lack == np.zeros(n))):
             self.consumption = necessary + a1*(self.saved - necessary)
             self.purchase = np.add(necessary, np.add(np.multiply(a2, normal), np.multiply(a3, leisure)))
             self.pay[1] = np.dot(price,self.purchase)
 
-            if any(self.debt != zeroArray):
+            if any(self.debt != np.zeros(n)):
                 self.amort = np.multiply(a4, self.debt)
 
             

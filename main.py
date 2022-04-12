@@ -14,8 +14,8 @@ class Simulation:
 
     def __init__(self,
                  end_time:      int = 1,
-                 firms:         list = zeroArray,
-                 households:    list = zeroArray,
+                 firms:         list = np.zeros(n),
+                 households:    list = np.zeros(n),
                  bank:          Bank = Bank()):
         self.end_time = end_time
         self.bank = bank
@@ -60,7 +60,7 @@ class Simulation:
             firm.marketshare_setting(markup)
             firm.produced_and_depreciated_goods()
             firm.number_of_jobs()
-            total_purchase = zeroArray
+            total_purchase = np.zeros(n)
             total_purchase[firm.firm_type-2]  = total(self.households, "purchase")[firm.firm_type-2] + total(self.firms, "purchase")[firm.firm_type-2] 
             firm.turnover_and_revenue(total_purchase[firm.firm_type-2])
             if firm.will_plan(t, firm.production_setting_period):
