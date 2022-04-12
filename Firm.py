@@ -58,7 +58,7 @@ class Firm(Agent):
         return np.subtract(self.output(), self.consumption)
     
     def plan_wages(self):
-        wage_payed = (1/self.marketshare) * self.wage_markup_relation
+        wage_payed = (1/(1+self.marketshare)) * self.wage_markup_relation
         return wage_payed 
 
     def pay_wages(self):
