@@ -114,7 +114,7 @@ class Firm(Agent):
         production_vector = input_output[self.firm_type]
         unit_cost = np.dot(production_vector, price) + self.plan_wages()
         profit_margin = price[self.firm_type] - unit_cost
-        price[self.firm_type] = c1*unit_cost*self.marketshare + c2*profit_margin*self.marketshare
+        price[self.firm_type] = c1*unit_cost*(self.marketshare + 1) + c2*profit_margin*(self.marketshare + 1)
         return (unit_cost, profit_margin, price)
 
     def wage_share(self):
