@@ -54,6 +54,10 @@ class Household(Agent):
         return (self.depreciated_goods() + self.wage + self.loan - self.amort + self.transferal 
                 - self.tax + self.purchase - self.pay)
      
+    def new_saved(self):
+        self.saved = self.saved + self.change_in_saved()
+        return self.saved
+    
     #This is hypothesis 1, that does not have any buffert
     def consumption_and_purchase(self, necessary, price):
         #Change this if they do not only buy the necessary, differentiate them to include class-differences in spending and consumption

@@ -26,7 +26,7 @@ with open('my_data.json') as my_data:
 n = len(input_output)
 
 
-productivity = [1/input_output[0][j] for j in range (n)]
+productivity = [1/input_output[0][j] for j in range (2,n)]
 
 #Inverse Leontief
 inv_input_output = np.linalg.inv(input_output)

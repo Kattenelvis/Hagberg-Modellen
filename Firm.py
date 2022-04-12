@@ -81,6 +81,10 @@ class Firm(Agent):
         return (self.produced_and_depreciated_goods() - wage + self.loan - self.amort + self.transferal 
                 - self.tax + self.purchase - self.pay - self.turnover_and_revenue(total_purchase)[0] + self.turnover_and_revenue(total_purchase)[1])
     
+    def new_saved(self, total_purchase):
+        self.saved = self.saved + self.change_in_saved(total_purchase)
+        return self.saved
+    
     #Is used at the end of each simulated step
     def save_previous_turnover(self, total_purchase):
         self.previous_turnover = self.turnover_and_revenue(total_purchase)[0]

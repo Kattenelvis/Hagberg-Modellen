@@ -37,7 +37,7 @@ class Simulation:
         employment_rate = employed/employable_number
         return employment_rate
 
-    history = []
+    history = {"total_firm_consumption": [], "total_household_consumption": [], "household_0_savings": []}
     def time_step(self, t):
         
         for i in range(len(self.households)):
@@ -49,6 +49,7 @@ class Simulation:
                 household.consumption_and_purchase(necessary, price)
             household.calculate_debt(interest_rate)
             household.change_in_saved()
+            household.new_saved()
             household.utility()
             
         for i in range(len(self.firms)):
@@ -69,13 +70,16 @@ class Simulation:
             firm.industrial_growth_percentage()
             firm.calculate_debt(interest_rate)
             firm.change_in_saved(total_purchase[firm.firm_type-2])
+            firm.new_saved(total_purchase[firm.firm_type-2])
             firm.save_previous_turnover(total_purchase[firm.firm_type-2])
         
         total_consumption = total(self.households, "consumption") + total(self.firms, "consumption") 
         self.employment_rate(total_consumption, self.households, standard_work_time)
         
 
-        self.history.append(total(self.households, "saved"))
+        self.history["total_firm_consumption"].append(total(self.firms, "consumption"))
+        self.history["total_household_consumption"].append(total(self.households, "consumption"))
+        self.history["household_0_savings"].append(self.households[0].saved)
 
     def simulate(self):
         for t in range(self.end_time):
@@ -84,8 +88,7 @@ class Simulation:
 simulation = Simulation(end_time, start_firms, start_households)
 simulation.simulate()
 
-print(simulation.history)
 
 fig, ax = plt.subplots()
-ax.plot([i for i in range(end_time)], simulation.history)
+ax.plot([i for i in range(end_time)], simulation.history["total_firm_consumption"])
 plt.show()
