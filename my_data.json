@@ -3,5 +3,11 @@
     "price": [1, 1, 1],
     "markup": [1, 1, 1],
     "standard_work_time": 8,
-    "end_time": 20
+    "end_time": 20,
+    "start_households": [{"firm_type": 2, "age": 30, "saved": [0, 10, 8]}],
+    "start_firms": [{"previous_turnover": [0, 0, 1], "saved": [0, 30, 20]}],
+    "start_banks": [],
+    "start_states": [],
+    "necessary": [0, 0, 4], 
+    "interest_rate": [0, 1, 0]
 }

@@ -14,10 +14,14 @@ class Household(Agent):
                  wage:              np.array = zeroArray, 
                  tax:               np.array = zeroArray, 
                  transferal:        np.array = zeroArray, 
-                 preferences:       np.array = zeroArray, 
+                 preferences:       np.array = oneArray, 
+                 amort:             np.array = zeroArray,
+                 debt:              np.array = zeroArray,
+                 loan:              np.array = zeroArray,
+                 saved:             np.array = zeroArray,
                  purchase_period:   int = 1, 
-                 firm_type:         int = None,
-                 age:               int = 0):
+                 firm_type:         int = 2,
+                 age:               int = 16):
         self.purchase = purchase
         self.consumption = consumption 
         self.pay = pay 
@@ -28,9 +32,10 @@ class Household(Agent):
         self.purchase_period = purchase_period
         self.firm_type = firm_type
         self.age = age
+        super().__init__(amort, debt, loan, saved)
 
-    def utility(self, preferences):
-        return np.dot(self.consumption, preferences) 
+    def utility(self):
+        return np.dot(self.consumption, self.preferences) 
 
     #This is always to be calculated before the new consumption
     def output(self):
@@ -38,21 +43,12 @@ class Household(Agent):
     def depreciated_goods(self):
         return np.subtract(self.output(), self.consumption)
     
-    def getting_wage(self, firm):
-        self.wage[1] = firm.pay_wages()/firm.number_of_jobs()
+    def getting_wage(self, firms):
+        self.wage[1] = firms[self.firm_type-2].pay_wages()/firms[self.firm_type-2].number_of_jobs()
         return self.wage
 
     def is_employable(self, minAge, maxAge):
         return (minAge < self.age < maxAge)
-
-    def employment_rate(total_consumption, households, standard_work_time):
-        employable_number = 0
-        employed = (total_consumption[0]*(1/standard_work_time))
-        for i in households:
-            if i.is_employable() == True:
-                employable_number += 1
-        employment_rate = employed/employable_number
-        return employment_rate
 
     def change_in_saved(self):
         return (self.depreciated_goods() + self.wage + self.loan - self.amort + self.transferal 
@@ -69,9 +65,10 @@ class Household(Agent):
         lack = np.subtract(necessary, self.saved)
         lack = lack.clip(min=0) 
         lack_cost = np.dot(lack,price)
+        
 
         #If basic needs aren't met
-        if (lack != zeroArray):
+        if (any(lack != zeroArray)):
             #If the household affords the lack
             if (self.saved[1] >= lack_cost):
                 self.purchase = lack
@@ -85,17 +82,14 @@ class Household(Agent):
                 self.consumption = necessary
 
         #If basic needs are met
-        elif (lack == zeroArray):
+        elif (any(lack == zeroArray)):
             self.consumption = necessary + a1*(self.saved - necessary)
             self.purchase = np.add(necessary, np.add(np.multiply(a2, normal), np.multiply(a3, leisure)))
             self.pay[1] = np.dot(price,self.purchase)
 
-            if self.debt != zeroArray:
+            if any(self.debt != zeroArray):
                 self.amort = np.multiply(a4, self.debt)
 
             
-        def will_plan(self, t, interval_type):
-            if (t%getattr(self, interval_type) == 0):
-                return True
-            else:
-                return False
+
+            

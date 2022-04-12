@@ -16,5 +16,7 @@ class Agent:
     def calculate_debt(self, interest_rate):
         return (self.debt + self.loan - self.amort)*interest_rate
 
+    def will_plan(self, t, interval_type):
+        return (t%interval_type == 0)
 
     
