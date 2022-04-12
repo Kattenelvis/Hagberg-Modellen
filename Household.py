@@ -1,3 +1,4 @@
+from locale import normalize
 from pickle import NONE
 import numpy as np
 from asyncio.windows_events import NULL
@@ -20,7 +21,8 @@ class Household(Agent):
                  loan:              np.array = np.zeros(n),
                  saved:             np.array = np.zeros(n),
                  purchase_period:   int = 1, 
-                 firm_type:         int = 2,
+                 firm_number:       int = 2,
+                 education:         int = 1,
                  age:               int = 16):
         self.purchase = purchase
         self.consumption = consumption 
@@ -30,7 +32,8 @@ class Household(Agent):
         self.transferal = transferal 
         self.preferences = preferences
         self.purchase_period = purchase_period
-        self.firm_type = firm_type
+        self.firm_number = firm_number
+        self.education = education
         self.age = age
         super().__init__(amort, debt, loan, saved)
 
@@ -47,7 +50,7 @@ class Household(Agent):
         return depreciation
     
     def getting_wage(self, firms):
-        self.wage[1] = firms[self.firm_type-2].pay_wages()/firms[self.firm_type-2].number_of_jobs()
+        self.wage[1] = firms[self.firm_number-2].pay_wages()/firms[self.firm_number-2].number_of_jobs()
         return self.wage
 
     def is_employable(self, minAge, maxAge):
@@ -61,6 +64,33 @@ class Household(Agent):
         self.saved += self.change_in_saved()
         return self.saved
     
+    #This is a total search
+    def substitution_search_household(self, necessary, price, firms):
+        for i in range(2,n):
+            if (necessary[i] >= 1):
+                for j in range(2,n): 
+                    if((price[i] > price[j]) and firms[i].good_type == firms[j].good_type):
+                        necessary[j] += necessary[i]
+                        necessary[i] = 0
+        return necessary
+    
+    
+    #Might be firm_number -2 *** confusion THIS IS ALSO A MONSTROSITY
+    def labor_market_search(self, firms):
+        for i in range(2,n):
+            if(firms[i].education_type == self.education):
+                if(firms[i].plan_wages() > firms[self.firm_number].plan_wages()):
+                    self.application(firms[i])
+                    return(self.application(firms[self.firm_number]))
+                else:
+                    self.application(firms[self.firm_number])
+                    return(self.application(firms[self.firm_number]))
+    def application(self, firm):
+        return firm.firm_number
+    
+
+    
+    
     #This is hypothesis 1, that does not have any buffert
     def consumption_and_purchase(self, necessary, price):
         #Change this if they do not only buy the necessary, differentiate them to include class-differences in spending and consumption
@@ -73,7 +103,6 @@ class Household(Agent):
         lack = lack.clip(min=0) 
         lack_cost = np.dot(lack,price)
         
-
         #If basic needs aren't met
         if (any(lack != np.zeros(n))):
             #If the household affords the lack
@@ -96,6 +125,7 @@ class Household(Agent):
 
             if any(self.debt != np.zeros(n)):
                 self.amort = np.multiply(a4, self.debt)
+
 
             
 

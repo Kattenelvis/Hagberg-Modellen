@@ -18,7 +18,9 @@ class Firm(Agent):
                  debt:                      np.array = np.zeros(n),
                  loan:                      np.array = np.zeros(n),
                  saved:                     np.array = np.zeros(n),
-                 firm_type:                 int = 2,  
+                 firm_number:               int = 2,
+                 good_type:                 int = 1,  
+                 education_type:            int = 1,
                  price_setting_period:      int = 25,
                  wage_setting_period:       int = 10,
                  production_setting_period: int = 15,
@@ -32,7 +34,9 @@ class Firm(Agent):
         self.tax = tax
         self.transferal = transferal
         self.pay = pay
-        self.firm_type = firm_type
+        self.firm_number = firm_number
+        self.good_type = good_type
+        self.education_type = education_type
         self.price_setting_period = price_setting_period
         self.wage_setting_period = wage_setting_period
         self.production_setting_period = production_setting_period
@@ -47,7 +51,7 @@ class Firm(Agent):
     
     #marketshares make up the markup vector
     def marketshare_setting(self, markup):
-        self.marketshare = markup[self.firm_type]
+        self.marketshare = markup[self.firm_number]
         return self.marketshare
     
     #This is always to be calculated before the new consumption
@@ -71,7 +75,7 @@ class Firm(Agent):
 
     def turnover_and_revenue(self, total_purchase):
         turnover, revenue = [np.zeros(n) for i in range(2)]
-        turnover[self.firm_type - 2] = total_purchase
+        turnover[self.firm_number - 2] = total_purchase
         revenue[1] = np.dot(turnover, price)
         return (turnover, revenue)
     
@@ -96,6 +100,19 @@ class Firm(Agent):
         self.consumption = np.dot(input_output,(self.prognosis * self.previous_turnover))
         return self.consumption
 
+    #This is a total search
+    #Is it really -2 here? confusion ***
+    def substitution_search_firm(self, firms, input_output):
+        for i in range(2,n):
+            if (self.consumption[i] >= 1):
+                for j in range(2,n):
+                    if ((price[i] > price[j]) and firms[i].good_type == firms[j].good_type):
+                        self.consumption[j] += self.consumption[i]
+                        self.consumption[i] = 0
+                        input_output[self.firm_number][j] += input_output[self.firm_number][i]
+                        input_output[self.firm_number][i] = 0
+        return (self.consumption, input_output)
+    
     def purchases(self):
         lack = self.consumption - self.saved
         lack = lack.clip(min=0) 
@@ -111,10 +128,10 @@ class Firm(Agent):
     #Price setting
     def plan_prices(self):
         c1, c2 = (1.0, 0.7)
-        production_vector = input_output[self.firm_type]
+        production_vector = input_output[self.firm_number]
         unit_cost = np.dot(production_vector, price) + self.plan_wages()
-        profit_margin = price[self.firm_type] - unit_cost
-        price[self.firm_type] = c1*unit_cost*(self.marketshare + 1) + c2*profit_margin*(self.marketshare + 1)
+        profit_margin = price[self.firm_number] - unit_cost
+        price[self.firm_number] = c1*unit_cost*(self.marketshare + 1) + c2*profit_margin*(self.marketshare + 1)
         return (unit_cost, profit_margin, price)
 
     def wage_share(self):
@@ -129,4 +146,14 @@ class Firm(Agent):
         return kaldorian_growth
 
 
+    #I have no idea what this monstrosity is confusion ***
+    def answer_application(self, households):
+        for i in range(n):
+            if (households[i].application(self.firm_number) == self.firm_number):
+                workers_number = 0
+                for j in range(n):
+                    if (households[j].firm_number == self.firm_number):
+                        workers_number += 1
+                    if ((workers_number/self.consumption[0] > standard_work_time) and (self.saved[0] > standard_work_time*self.plan_wages())):
+                        households[i].firm_number = self.firm_number
    

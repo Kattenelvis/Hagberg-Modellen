@@ -26,7 +26,7 @@ class Simulation:
         self.firms = firms
         for i in range(len(households)): 
             household = households[i]
-            households[i] = Household(firm_type = household["firm_type"], saved = household["saved"], age = household["age"])
+            households[i] = Household(firm_number = household["firm_number"], saved = household["saved"], age = household["age"])
         self.households = households
 
 
@@ -61,8 +61,8 @@ class Simulation:
             firm.produced_and_depreciated_goods()
             firm.number_of_jobs()
             total_purchase = np.zeros(n)
-            total_purchase[firm.firm_type-2]  = total(self.households, "purchase")[firm.firm_type-2] + total(self.firms, "purchase")[firm.firm_type-2] 
-            firm.turnover_and_revenue(total_purchase[firm.firm_type-2])
+            total_purchase[firm.firm_number-2]  = total(self.households, "purchase")[firm.firm_number-2] + total(self.firms, "purchase")[firm.firm_number-2] 
+            firm.turnover_and_revenue(total_purchase[firm.firm_number-2])
             if firm.will_plan(t, firm.production_setting_period):
                 firm.plan_consumption()
             if firm.will_plan(t, firm.purchase_period):
@@ -72,9 +72,9 @@ class Simulation:
             firm.wage_share()
             firm.industrial_growth_percentage()
             firm.calculate_debt(interest_rate)
-            firm.change_in_saved(total_purchase[firm.firm_type-2])
-            firm.new_saved(total_purchase[firm.firm_type-2])
-            firm.save_previous_turnover(total_purchase[firm.firm_type-2])
+            firm.change_in_saved(total_purchase[firm.firm_number-2])
+            firm.new_saved(total_purchase[firm.firm_number-2])
+            firm.save_previous_turnover(total_purchase[firm.firm_number-2])
             
         self.bank.credit_expansion(0)
         self.bank.saved_bank()
