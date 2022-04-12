@@ -15,8 +15,10 @@ class Simulation:
     def __init__(self,
                  end_time:      int = 1,
                  firms:         list = zeroArray,
-                 households:    list = zeroArray):
+                 households:    list = zeroArray,
+                 bank:          Bank = Bank()):
         self.end_time = end_time
+        self.bank = bank
         
         for i in range(len(firms)): 
             firm = firms[i]       
@@ -38,7 +40,7 @@ class Simulation:
         return employment_rate
 
     history = {"total_firm_consumption": [], "total_household_consumption": [], "household_0_savings": [],
-               "household_consumption_purchase": [], "price": []}
+               "total_household_debt": [], "price": [], "total_savings": [], "token_amount": []}
     def time_step(self, t):
         
         for i in range(len(self.households)):
@@ -66,14 +68,18 @@ class Simulation:
             if firm.will_plan(t, firm.purchase_period):
                 firm.purchases()
             if firm.will_plan(t, firm.price_setting_period):
-                firm.plan_prices()
+                self.history["price"].append(firm.plan_prices()[2])
             firm.wage_share()
             firm.industrial_growth_percentage()
             firm.calculate_debt(interest_rate)
             firm.change_in_saved(total_purchase[firm.firm_type-2])
             firm.new_saved(total_purchase[firm.firm_type-2])
             firm.save_previous_turnover(total_purchase[firm.firm_type-2])
-        
+            
+        self.bank.credit_expansion(0)
+        self.bank.saved_bank()
+            
+            
         total_consumption = total(self.households, "consumption") + total(self.firms, "consumption") 
         self.employment_rate(total_consumption, self.households, standard_work_time)
         
@@ -81,8 +87,11 @@ class Simulation:
         self.history["total_firm_consumption"].append(total(self.firms, "consumption"))
         self.history["total_household_consumption"].append(total(self.households, "consumption"))
         self.history["household_0_savings"].append(self.households[0].saved)
-        self.history["household_consumption_purchase"].append(self.households[0].consumption_and_purchase(necessary, price))
-        #self.history["price"].append(self.firms[0].plan_prices(2))
+        self.history["total_household_debt"].append(self.households[0].debt)
+        self.history["total_savings"].append(total(self.firms, "saved")+total(self.households, "saved")+self.bank.saved)
+        self.history["token_amount"].append(self.firms[0].saved[1]+self.households[0].saved[1]+self.bank.saved[1])
+
+
         
         
         
@@ -96,5 +105,5 @@ simulation.simulate()
 
 
 fig, ax = plt.subplots()
-ax.plot([i for i in range(end_time)], simulation.history["price"])
+ax.plot([i for i in range(end_time)], simulation.history["total_savings"])
 plt.show()

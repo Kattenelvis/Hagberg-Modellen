@@ -19,9 +19,9 @@ class Firm(Agent):
                  loan:                      np.array = zeroArray,
                  saved:                     np.array = zeroArray,
                  firm_type:                 int = 2,  
-                 price_setting_period:      int = 1,
-                 wage_setting_period:       int = 1,
-                 production_setting_period: int = 1,
+                 price_setting_period:      int = 25,
+                 wage_setting_period:       int = 10,
+                 production_setting_period: int = 15,
                  purchase_period:           int = 1,  
                  marketshare:               int = 1):
         self.purchase = purchase
