@@ -20,7 +20,7 @@ class Simulation:
         
         for i in range(len(firms)): 
             firm = firms[i]       
-            firms[i] = Firm(previous_turnover = firm["previous_turnover"], saved = firm["saved"])
+            firms[i] = Firm(previous_turnover = firm["previous_turnover"], saved = firm["saved"], prognosis = np.array(firm["prognosis"]))
         self.firms = firms
         for i in range(len(households)): 
             household = households[i]
@@ -37,7 +37,8 @@ class Simulation:
         employment_rate = employed/employable_number
         return employment_rate
 
-    history = {"total_firm_consumption": [], "total_household_consumption": [], "household_0_savings": []}
+    history = {"total_firm_consumption": [], "total_household_consumption": [], "household_0_savings": [],
+               "household_consumption_purchase": [], "price": []}
     def time_step(self, t):
         
         for i in range(len(self.households)):
@@ -80,6 +81,11 @@ class Simulation:
         self.history["total_firm_consumption"].append(total(self.firms, "consumption"))
         self.history["total_household_consumption"].append(total(self.households, "consumption"))
         self.history["household_0_savings"].append(self.households[0].saved)
+        self.history["household_consumption_purchase"].append(self.households[0].consumption_and_purchase(necessary, price))
+        #self.history["price"].append(self.firms[0].plan_prices(2))
+        
+        
+        
 
     def simulate(self):
         for t in range(self.end_time):
@@ -90,5 +96,5 @@ simulation.simulate()
 
 
 fig, ax = plt.subplots()
-ax.plot([i for i in range(end_time)], simulation.history["total_firm_consumption"])
+ax.plot([i for i in range(end_time)], simulation.history["price"])
 plt.show()

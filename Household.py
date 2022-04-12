@@ -65,7 +65,7 @@ class Household(Agent):
         
         normal, leisure = (zeroArray,zeroArray)
 
-        #Lack
+        #Lack of goods to survive
         lack = np.subtract(necessary, self.saved)
         lack = lack.clip(min=0) 
         lack_cost = np.dot(lack,price)

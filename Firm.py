@@ -47,7 +47,7 @@ class Firm(Agent):
     
     #marketshares make up the markup vector
     def marketshare_setting(self, markup):
-        self.marketshare = markup[self.firm_type-2]
+        self.marketshare = markup[self.firm_type]
         return self.marketshare
     
     #This is always to be calculated before the new consumption
@@ -110,13 +110,11 @@ class Firm(Agent):
 
     #Price setting
     def plan_prices(self):
-        c1, c2 = (1.0, 0.1)
-        production_vector = zeroArray
-        for i in range(0,n):
-            production_vector += input_output[self.firm_type-2][i]
-            unit_cost = np.dot(production_vector, price) + self.plan_wages()
-        profit_margin = price[self.firm_type-2] - unit_cost
-        price[self.firm_type-2] = c1*unit_cost*self.marketshare + c2*profit_margin*self.marketshare
+        c1, c2 = (1.0, 0.7)
+        production_vector = input_output[self.firm_type]
+        unit_cost = np.dot(production_vector, price) + self.plan_wages()
+        profit_margin = price[self.firm_type] - unit_cost
+        price[self.firm_type] = c1*unit_cost*self.marketshare + c2*profit_margin*self.marketshare
         return (unit_cost, profit_margin, price)
 
     def wage_share(self):
