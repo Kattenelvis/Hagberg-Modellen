@@ -5,12 +5,12 @@ from Initial import *
 class Bank(Agent):
 
     def __init__(self, 
-                tokens_created:     np.array = zeroArray, 
-                tokens_destroyed:   np.array = zeroArray,
-                amort:              np.array = zeroArray,
-                debt:               np.array = zeroArray,
-                loan:               np.array = zeroArray,
-                saved:              np.array = zeroArray):
+                tokens_created:     np.array = np.zeros(n), 
+                tokens_destroyed:   np.array = np.zeros(n),
+                amort:              np.array = np.zeros(n),
+                debt:               np.array = np.zeros(n),
+                loan:               np.array = np.zeros(n),
+                saved:              np.array = np.zeros(n)):
             self.tokens_created = tokens_created
             self.tokens_destroyed = tokens_destroyed
             super().__init__(amort, debt, loan, saved)

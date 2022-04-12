@@ -41,7 +41,10 @@ class Household(Agent):
     def output(self):
         return np.dot(inv_input_output, self.consumption)
     def depreciated_goods(self):
-        return np.subtract(self.output(), self.consumption)
+        depreciation = np.subtract(self.output(), self.consumption)
+        depreciation[0] = 0
+        depreciation[1] = 0
+        return depreciation
     
     def getting_wage(self, firms):
         self.wage[1] = firms[self.firm_type-2].pay_wages()/firms[self.firm_type-2].number_of_jobs()
