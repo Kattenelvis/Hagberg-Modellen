@@ -84,12 +84,12 @@ class Simulation:
         self.employment_rate(total_consumption, self.households, standard_work_time)
         
 
-        self.history["total_firm_consumption"].append(total(self.firms, "consumption"))
-        self.history["total_household_consumption"].append(total(self.households, "consumption"))
-        self.history["household_0_savings"].append(self.households[0].saved)
-        self.history["total_household_debt"].append(self.households[0].debt)
-        self.history["total_savings"].append(total(self.firms, "saved")+total(self.households, "saved")+self.bank.saved)
-        self.history["token_amount"].append(self.firms[0].saved[1]+self.households[0].saved[1]+self.bank.saved[1])
+        #self.history["total_firm_consumption"].append(total(self.firms, "consumption"))
+        #self.history["total_household_consumption"].append(total(self.households, "consumption"))
+        #self.history["household_0_savings"].append(self.households[0].saved)
+        #self.history["total_household_debt"].append(self.households[0].debt)
+        #self.history["total_savings"].append(total(self.firms, "saved")+total(self.households, "saved")+self.bank.saved)
+        #self.history["token_amount"].append(self.firms[0].saved[1]+self.households[0].saved[1]+self.bank.saved[1])
 
 
         

@@ -8,17 +8,17 @@ from Initial import *
 class Household(Agent):      
 
     def __init__(self, 
-                 purchase:          np.array = zeroArray,  
-                 consumption:       np.array = zeroArray, 
-                 pay:               np.array = zeroArray, 
-                 wage:              np.array = zeroArray, 
-                 tax:               np.array = zeroArray, 
-                 transferal:        np.array = zeroArray, 
+                 purchase:          np.array = np.zeros(n),  
+                 consumption:       np.array = np.zeros(n), 
+                 pay:               np.array = np.zeros(n), 
+                 wage:              np.array = np.zeros(n), 
+                 tax:               np.array = np.zeros(n), 
+                 transferal:        np.array = np.zeros(n), 
                  preferences:       np.array = oneArray, 
-                 amort:             np.array = zeroArray,
-                 debt:              np.array = zeroArray,
-                 loan:              np.array = zeroArray,
-                 saved:             np.array = zeroArray,
+                 amort:             np.array = np.zeros(n),
+                 debt:              np.array = np.zeros(n),
+                 loan:              np.array = np.zeros(n),
+                 saved:             np.array = np.zeros(n),
                  purchase_period:   int = 1, 
                  firm_type:         int = 2,
                  age:               int = 16):
@@ -55,7 +55,7 @@ class Household(Agent):
                 - self.tax + self.purchase - self.pay)
      
     def new_saved(self):
-        self.saved = self.saved + self.change_in_saved()
+        self.saved += self.change_in_saved()
         return self.saved
     
     #This is hypothesis 1, that does not have any buffert
