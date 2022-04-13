@@ -73,7 +73,7 @@ class Household(Agent):
         for i in range(2,n):
             if (necessary[i] >= 1):
                 for j in range(2,n): 
-                    if((price[i] > price[j]) and firms[i].good_type == firms[j].good_type):
+                    if((price[i] > price[j]) and firms[i - 2].good_type == firms[j - 2].good_type):
                         necessary[j] += necessary[i]
                         necessary[i] = 0
         return necessary
@@ -94,7 +94,7 @@ class Household(Agent):
     
     
     #This is hypothesis 1, that does not have any buffert
-    def consumption_and_purchase(self, necessary, price):
+    def consumption_and_purchase(self, necessary, price, debt_floor_households):
         #Change this if they do not only buy the necessary, differentiate them to include class-differences in spending and consumption
         a1, a2, a3, a4 = np.array([np.zeros(n) for i in range(4)])
         
@@ -113,11 +113,12 @@ class Household(Agent):
                 self.pay[1] = lack_cost
                 self.consumption = necessary
             else:
-                #If the household does not afford the lack they loan that amount
-                self.loan[1] = lack_cost
-                self.purchase = lack
-                self.pay[1] = lack_cost
-                self.consumption = necessary
+                if(self.debt[1] < debt_floor_households):
+                    #If the household does not afford the lack they loan that amount
+                    self.loan[1] = lack_cost
+                    self.purchase = lack
+                    self.pay[1] = lack_cost
+                    self.consumption = necessary
 
         #If basic needs are met
         elif (any(lack == np.zeros(n))):

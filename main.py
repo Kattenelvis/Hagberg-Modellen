@@ -22,7 +22,7 @@ class Simulation:
         
         for i in range(len(firms)): 
             firm = firms[i]       
-            firms[i] = Firm(previous_turnover = firm["previous_turnover"], saved = firm["saved"], prognosis = np.array(firm["prognosis"]))
+            firms[i] = Firm(previous_turnover = firm["previous_turnover"], saved = firm["saved"], prognosis = np.array(firm["prognosis"]), firm_number = firm["firm_number"])
         self.firms = firms
         for i in range(len(households)): 
             household = households[i]
@@ -51,7 +51,7 @@ class Simulation:
             if household.will_plan(t, household.search_period):
                 household.substitution_search_household(necessary, price, self.firms)
             if household.will_plan(t, household.purchase_period):
-                household.consumption_and_purchase(necessary, price)
+                household.consumption_and_purchase(necessary, price, debt_floor_households)
             household.calculate_debt(interest_rate)
             household.change_in_saved()
             household.new_saved()
@@ -65,23 +65,23 @@ class Simulation:
             firm.produced_and_depreciated_goods()
             firm.number_of_jobs()
             total_purchase = np.zeros(n)
-            total_purchase[firm.firm_number-2]  = total(self.households, "purchase")[firm.firm_number-2] + total(self.firms, "purchase")[firm.firm_number-2] 
-            firm.turnover_and_revenue(total_purchase[firm.firm_number-2])
+            total_purchase[firm.firm_number]  = total(self.households, "purchase")[firm.firm_number] + total(self.firms, "purchase")[firm.firm_number] 
+            firm.turnover_and_revenue(total_purchase[firm.firm_number])
             if firm.will_plan(t, firm.production_setting_period):
                 firm.plan_consumption()
             if firm.will_plan(t, firm.purchase_period):
-                firm.purchases()
+                firm.purchases(debt_floor_firms, loan_roof)
             if firm.will_plan(t, firm.price_setting_period):
                 self.history["price"].append(firm.plan_prices()[2])
             firm.wage_share()
             firm.industrial_growth_percentage()
             firm.calculate_debt(interest_rate)
-            firm.change_in_saved(total_purchase[firm.firm_number-2])
-            firm.new_saved(total_purchase[firm.firm_number-2])
-            firm.save_previous_turnover(total_purchase[firm.firm_number-2])
+            firm.change_in_saved(total_purchase[firm.firm_number])
+            firm.new_saved(total_purchase[firm.firm_number])
+            firm.save_previous_turnover(total_purchase[firm.firm_number])
             firm.answer_application(self.households)
             
-        self.bank.credit_expansion(0)
+        self.bank.credit_expansion(100)
         self.bank.saved_bank()
             
             
@@ -108,5 +108,5 @@ simulation.simulate()
 
 
 fig, ax = plt.subplots()
-ax.plot([i for i in range(end_time)], simulation.history["total_firm_consumption"])
+ax.plot([i for i in range(end_time)], simulation.history["total_loans"])
 plt.show()

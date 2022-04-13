@@ -1,0 +1,16 @@
+{
+    "input_output": [[1, 0, 8, 4], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]],
+    "price": [0, 1, 150, 200],
+    "markup": [1, 1, 1, 1],
+    "standard_work_time": 8,
+    "end_time": 15,
+    "start_households": [{"firm_number": 2, "age": 30, "saved": [0, 5000, 800, 400]}, {"firm_number": 3, "age": 30, "saved": [0, 10000, 800, 400]}],
+    "start_firms": [{"firm_number": 2, "previous_turnover": [0, 0, 100, 0], "saved": [0, 30000, 200, 50], "prognosis": [0, 0, 1, 0]}, {"firm_number": 3, "previous_turnover": [0, 0, 0, 2], "saved": [0, 30000, 2000, 500], "prognosis": [0, 0, 0, 200]}],
+    "start_banks": [],
+    "start_states": [],
+    "necessary": [0, 0, 40, 10], 
+    "interest_rate": [0, 1, 0, 0],
+    "debt_floor_households":2000,
+    "debt_floor_firms":2000,
+    "loan_roof": 100000
+}

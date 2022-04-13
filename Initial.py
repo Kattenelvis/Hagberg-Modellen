@@ -5,7 +5,7 @@ import numpy as np
 import json
 
 
-with open('my_data.json') as my_data:
+with open('my_data2.json') as my_data:
   data = json.load(my_data)
   #input_output is the n times n Leontief matrix where each row corresponds to a firm and an associated branded good
   #Row 0 is for labor hours, row 1 is for the standard token and the rest for the goods
@@ -22,6 +22,9 @@ with open('my_data.json') as my_data:
   start_states = data['start_states']
   necessary = np.array(data['necessary'])
   interest_rate = np.array(data['interest_rate'])
+  debt_floor_households = np.array(data['debt_floor_households'])
+  debt_floor_firms = data['debt_floor_firms']
+  loan_roof = data['loan_roof']
 
 n = len(input_output)
 

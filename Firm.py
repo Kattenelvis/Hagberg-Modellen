@@ -24,7 +24,7 @@ class Firm(Agent):
                  price_setting_period:      int = 25,
                  wage_setting_period:       int = 10,
                  production_setting_period: int = 15,
-                 purchase_period:           int = 1,  
+                 purchase_period:           int = 4,  
                  marketshare:               int = 1):
         self.purchase = purchase
         self.previous_turnover = previous_turnover
@@ -59,7 +59,10 @@ class Firm(Agent):
         return np.dot(inv_input_output, self.consumption)
     
     def produced_and_depreciated_goods(self):
-        return np.subtract(self.output(), self.consumption)
+        a = np.subtract(self.output(), self.consumption)
+        a[0] = 0
+        a[1] = 0
+        return(a)
     
     def plan_wages(self):
         wage_payed = (1/(1+self.marketshare)) * self.wage_markup_relation
@@ -106,14 +109,14 @@ class Firm(Agent):
         for i in range(2,n):
             if (self.consumption[i] >= 1):
                 for j in range(2,n):
-                    if ((price[i] > price[j]) and firms[i].good_type == firms[j].good_type):
+                    if ((price[i] > price[j]) and firms[i - 2].good_type == firms[j - 2].good_type):
                         self.consumption[j] += self.consumption[i]
                         self.consumption[i] = 0
                         input_output[self.firm_number][j] += input_output[self.firm_number][i]
                         input_output[self.firm_number][i] = 0
         return (self.consumption, input_output)
     
-    def purchases(self):
+    def purchases(self, debt_floor_firms, loan_roof):
         lack = self.consumption - self.saved
         lack = lack.clip(min=0) 
         lack_cost = np.dot(lack, price)
@@ -121,9 +124,17 @@ class Firm(Agent):
             self.purchase = lack
             self.pay[1] = np.dot(self.purchase, price) 
         else:
-            self.loan[1] = lack_cost
-            self.purchase = lack
-            self.pay[1] = np.dot(self.purchase, price) 
+            if(self.debt[1] < debt_floor_firms):
+                if(lack_cost < loan_roof):
+                    self.loan[1] = lack_cost
+                    self.purchase = lack
+                    self.pay[1] = np.dot(self.purchase, price)
+                else:
+                    self.loan[1] = loan_roof
+                    self.consumption = self.saved - lack  
+            else: 
+                self.consumption = self.saved - lack
+                #this is already accounted for in change of savings: self.saved = self.saved - self.consumption
 
     #Price setting
     def plan_prices(self):
@@ -149,10 +160,10 @@ class Firm(Agent):
     #I have no idea what this monstrosity is confusion ***
     def answer_application(self, households):
         for i in range(len(households)):
-            if (households[i].application(self.firm_number-2) == self.firm_number-2):
+            if (households[i].application(self.firm_number) == self.firm_number):
                 workers_number = 0
                 for j in range(len(households)):
-                    if (households[j].firm_number-2 == self.firm_number-2):
+                    if (households[j].firm_number == self.firm_number):
                         workers_number += 1
                     if ((workers_number/self.consumption[0] > standard_work_time) and (self.saved[0] > standard_work_time*self.plan_wages())):
                         households[i].firm_number = self.firm_number
