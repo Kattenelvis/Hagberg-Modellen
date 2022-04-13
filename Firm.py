@@ -148,11 +148,11 @@ class Firm(Agent):
 
     #I have no idea what this monstrosity is confusion ***
     def answer_application(self, households):
-        for i in range(n):
-            if (households[i].application(self.firm_number) == self.firm_number):
+        for i in range(len(households)):
+            if (households[i].application(self.firm_number-2) == self.firm_number-2):
                 workers_number = 0
-                for j in range(n):
-                    if (households[j].firm_number == self.firm_number):
+                for j in range(len(households)):
+                    if (households[j].firm_number-2 == self.firm_number-2):
                         workers_number += 1
                     if ((workers_number/self.consumption[0] > standard_work_time) and (self.saved[0] > standard_work_time*self.plan_wages())):
                         households[i].firm_number = self.firm_number

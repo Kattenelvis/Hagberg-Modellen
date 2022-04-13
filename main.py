@@ -48,12 +48,16 @@ class Simulation:
             household.depreciated_goods()
             household.getting_wage(self.firms)
             household.is_employable(16, 65)
+            if household.will_plan(t, household.search_period):
+                household.substitution_search_household(necessary, price, self.firms)
             if household.will_plan(t, household.purchase_period):
                 household.consumption_and_purchase(necessary, price)
             household.calculate_debt(interest_rate)
             household.change_in_saved()
             household.new_saved()
             household.utility()
+            if household.will_plan(t, household.job_search_period):
+                household.labor_market_search(self.firms)
             
         for i in range(len(self.firms)):
             firm = self.firms[i]
@@ -75,6 +79,7 @@ class Simulation:
             firm.change_in_saved(total_purchase[firm.firm_number-2])
             firm.new_saved(total_purchase[firm.firm_number-2])
             firm.save_previous_turnover(total_purchase[firm.firm_number-2])
+            firm.answer_application(self.households)
             
         self.bank.credit_expansion(0)
         self.bank.saved_bank()
@@ -103,5 +108,5 @@ simulation.simulate()
 
 
 fig, ax = plt.subplots()
-ax.plot([i for i in range(end_time)], simulation.history["total_loans"])
+ax.plot([i for i in range(end_time)], simulation.history["total_firm_consumption"])
 plt.show()

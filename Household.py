@@ -21,6 +21,8 @@ class Household(Agent):
                  loan:              np.array = np.zeros(n),
                  saved:             np.array = np.zeros(n),
                  purchase_period:   int = 1, 
+                 search_period:     int = 100,
+                 job_search_period: int = 200,
                  firm_number:       int = 2,
                  education:         int = 1,
                  age:               int = 16):
@@ -32,6 +34,8 @@ class Household(Agent):
         self.transferal = transferal 
         self.preferences = preferences
         self.purchase_period = purchase_period
+        self.search_period = search_period
+        self.job_search_period = job_search_period
         self.firm_number = firm_number
         self.education = education
         self.age = age
@@ -78,15 +82,13 @@ class Household(Agent):
     #Might be firm_number -2 *** confusion THIS IS ALSO A MONSTROSITY
     def labor_market_search(self, firms):
         for i in range(2,n):
-            if(firms[i].education_type == self.education):
-                if(firms[i].plan_wages() > firms[self.firm_number].plan_wages()):
-                    self.application(firms[i])
-                    return(self.application(firms[self.firm_number]))
+            if(firms[i-2].education_type == self.education):
+                if(firms[i - 2].plan_wages() > firms[self.firm_number - 2].plan_wages()):
+                    return(self.application(i - 2))
                 else:
-                    self.application(firms[self.firm_number])
-                    return(self.application(firms[self.firm_number]))
-    def application(self, firm):
-        return firm.firm_number
+                    return(self.application(self.firm_number))
+    def application(self, number):
+        return number
     
 
     
