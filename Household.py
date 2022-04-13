@@ -97,14 +97,11 @@ class Household(Agent):
     def consumption_and_purchase(self, necessary, price, debt_floor_households):
         #Change this if they do not only buy the necessary, differentiate them to include class-differences in spending and consumption
         a1, a2, a3, a4 = np.array([np.zeros(n) for i in range(4)])
-        
         normal, leisure = (np.zeros(n),np.zeros(n))
-
         #Lack of goods to survive
         lack = np.subtract(necessary, self.saved)
         lack = lack.clip(min=0) 
         lack_cost = np.dot(lack,price)
-        
         #If basic needs aren't met
         if (any(lack != np.zeros(n))):
             #If the household affords the lack
@@ -115,17 +112,19 @@ class Household(Agent):
             else:
                 if(self.debt[1] < debt_floor_households):
                     #If the household does not afford the lack they loan that amount
-                    self.loan[1] = lack_cost
-                    self.purchase = lack
-                    self.pay[1] = lack_cost
-                    self.consumption = necessary
-
+                    if(lack_cost < loan_roof):
+                        self.loan[1] = lack_cost
+                        self.purchase = lack
+                        self.pay[1] = lack_cost
+                        self.consumption = necessary
+                    else:
+                        self.loan[1] = loan_roof
+                        self.consumption = self.saved - lack
         #If basic needs are met
         elif (any(lack == np.zeros(n))):
             self.consumption = necessary + a1*(self.saved - necessary)
             self.purchase = np.add(necessary, np.add(np.multiply(a2, normal), np.multiply(a3, leisure)))
             self.pay[1] = np.dot(price,self.purchase)
-
             if any(self.debt != np.zeros(n)):
                 self.amort = np.multiply(a4, self.debt)
 

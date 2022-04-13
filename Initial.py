@@ -22,7 +22,7 @@ with open('my_data2.json') as my_data:
   start_states = data['start_states']
   necessary = np.array(data['necessary'])
   interest_rate = np.array(data['interest_rate'])
-  debt_floor_households = np.array(data['debt_floor_households'])
+  debt_floor_households = data['debt_floor_households']
   debt_floor_firms = data['debt_floor_firms']
   loan_roof = data['loan_roof']
 

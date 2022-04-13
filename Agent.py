@@ -17,6 +17,6 @@ class Agent:
         return (self.debt + self.loan - self.amort)*interest_rate
 
     def will_plan(self, t, interval_type):
-        return (t%interval_type == 0)
+        return (t%interval_type == 0 and t != 0)
 
     

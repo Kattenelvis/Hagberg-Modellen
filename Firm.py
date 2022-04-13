@@ -116,7 +116,7 @@ class Firm(Agent):
                         input_output[self.firm_number][i] = 0
         return (self.consumption, input_output)
     
-    def purchases(self, debt_floor_firms, loan_roof):
+    def purchases(self, debt_floor_firms):
         lack = self.consumption - self.saved
         lack = lack.clip(min=0) 
         lack_cost = np.dot(lack, price)
@@ -138,11 +138,11 @@ class Firm(Agent):
 
     #Price setting
     def plan_prices(self):
-        c1, c2 = (1.0, 0.7)
+        c1, c2 = (0.05, 0.0)
         production_vector = input_output[self.firm_number]
         unit_cost = np.dot(production_vector, price) + self.plan_wages()
         profit_margin = price[self.firm_number] - unit_cost
-        price[self.firm_number] = c1*unit_cost*(self.marketshare + 1) + c2*profit_margin*(self.marketshare + 1)
+        price[self.firm_number] = c1*unit_cost*(1/(1 - self.marketshare)) + c2*profit_margin*(self.marketshare + 1)
         return (unit_cost, profit_margin, price)
 
     def wage_share(self):

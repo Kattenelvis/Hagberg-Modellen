@@ -9,6 +9,7 @@ from State import State
 from Common_functions import total
 from Initial import * 
 import matplotlib.pyplot as plt
+from copy import deepcopy
 
 class Simulation:
 
@@ -22,7 +23,7 @@ class Simulation:
         
         for i in range(len(firms)): 
             firm = firms[i]       
-            firms[i] = Firm(previous_turnover = firm["previous_turnover"], saved = firm["saved"], prognosis = np.array(firm["prognosis"]), firm_number = firm["firm_number"])
+            firms[i] = Firm(previous_turnover = firm["previous_turnover"], saved = firm["saved"], prognosis = np.array(firm["prognosis"]), firm_number = firm["firm_number"], price_setting_period = firm["price_setting_period"])
         self.firms = firms
         for i in range(len(households)): 
             household = households[i]
@@ -39,10 +40,10 @@ class Simulation:
         employment_rate = employed/employable_number
         return employment_rate
 
+
     history = {"total_firm_consumption": [], "total_household_consumption": [], "household_0_savings": [],
                "total_household_debt": [], "price": [], "total_savings": [], "token_amount": [], "total_loans": []}
     def time_step(self, t):
-        
         for i in range(len(self.households)):
             household = self.households[i]
             household.depreciated_goods()
@@ -62,7 +63,6 @@ class Simulation:
         for i in range(len(self.firms)):
             firm = self.firms[i]
             firm.marketshare_setting(markup)
-            firm.produced_and_depreciated_goods()
             firm.number_of_jobs()
             total_purchase = np.zeros(n)
             total_purchase[firm.firm_number]  = total(self.households, "purchase")[firm.firm_number] + total(self.firms, "purchase")[firm.firm_number] 
@@ -70,9 +70,9 @@ class Simulation:
             if firm.will_plan(t, firm.production_setting_period):
                 firm.plan_consumption()
             if firm.will_plan(t, firm.purchase_period):
-                firm.purchases(debt_floor_firms, loan_roof)
+                firm.purchases(debt_floor_firms)
             if firm.will_plan(t, firm.price_setting_period):
-                self.history["price"].append(firm.plan_prices()[2])
+                firm.plan_prices()
             firm.wage_share()
             firm.industrial_growth_percentage()
             firm.calculate_debt(interest_rate)
@@ -87,7 +87,7 @@ class Simulation:
             
         total_consumption = total(self.households, "consumption") + total(self.firms, "consumption") 
         self.employment_rate(total_consumption, self.households, standard_work_time)
-        
+
 
         self.history["total_firm_consumption"].append(total(self.firms, "consumption"))
         self.history["total_household_consumption"].append(total(self.households, "consumption"))
@@ -108,5 +108,5 @@ simulation.simulate()
 
 
 fig, ax = plt.subplots()
-ax.plot([i for i in range(end_time)], simulation.history["total_loans"])
+ax.plot([i for i in range(end_time)], simulation.history["total_firm_consumption"])
 plt.show()
