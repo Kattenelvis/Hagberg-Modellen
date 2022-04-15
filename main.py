@@ -110,3 +110,6 @@ simulation.simulate()
 fig, ax = plt.subplots()
 ax.plot([i for i in range(end_time)], simulation.history["total_firm_consumption"])
 plt.show()
+
+#TODO fix the problem of firms having no consumption yet having production, and to standardize 
+# the firm_number - 2 problem, as well as test multiple inputs
